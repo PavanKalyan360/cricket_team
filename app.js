@@ -15,14 +15,18 @@ const initializeDBandServer = async () => {
       filename: dbpath,
       driver: sqlite3.Database,
     })
-  } catch (e) {
-    console.log(`DB Error: ${e.message}`)
+    app.listen(3000, () =>
+      console.log('Server Running at http://localhost:3000/'),
+    )
+  } catch (error) {
+    console.log(`DB Error: ${error.message}`)
+    process.exit(1)
   }
 }
 
 initializeDBandServer()
 
-const convertDbObjectToResponseObject = (dbObject) => {
+const convertDbObjectToResponseObject = dbObject => {
   return {
     playerId: dbObject.player_id,
     playerName: dbObject.player_name,
@@ -56,7 +60,7 @@ app.post('/players/', async (request, response) => {
         ('${playerName}', ${jerseyNumber}, '${role}');`
 
   await db.run(addPlayerDetails)
-  response.send({message: 'Player Added to Team'})
+  response.send('Player Added to Team')
 })
 
 // API 3: Get player by ID
@@ -71,7 +75,7 @@ app.get('/players/:playerId/', async (request, response) => {
         player_id = ${playerId};`
 
   const player = await db.get(getPlayerDetails)
-  response.send(player)
+  response.send(convertDbObjectToResponseObject(player))
 })
 
 // API 4: Update player details by ID
@@ -91,7 +95,7 @@ app.put('/players/:playerId/', async (request, response) => {
         player_id = ${playerId};`
 
   await db.run(updatePlayerDetails)
-  response.send({message: 'Player Details Updated'})
+  response.send('Player Details Updated')
 })
 
 // API 5: Delete player by ID
@@ -104,7 +108,7 @@ app.delete('/players/:playerId/', async (request, response) => {
         player_id = ${playerId};`
 
   await db.run(deletePlayer)
-  response.send({message: 'Player Removed'})
+  response.send('Player Removed')
 })
 
 module.exports = app
